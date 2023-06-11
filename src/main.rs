@@ -1,8 +1,7 @@
 use filetime::{set_file_mtime, FileTime};
 use std::env;
 use std::fs;
-use std::io;
-use std::io::ErrorKind;
+use std::io::{self, ErrorKind};
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::UNIX_EPOCH;
