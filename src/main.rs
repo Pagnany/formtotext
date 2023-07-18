@@ -5,6 +5,7 @@ use std::io::{self, ErrorKind};
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::UNIX_EPOCH;
+use threadpool::ThreadPool;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -19,19 +20,29 @@ fn main() {
 
     let paths = fs::read_dir(repo_forms_pfad).expect("Pfad konnte nicht gelesen werden.");
 
+    let pool = ThreadPool::new(12);
+
     for path in paths {
-        match check_and_create_sc2_file(path, &repo_exe_pfad) {
-            Ok(_) => {}
-            Err(_e) => continue,
+        
+        match path {
+            Ok(wert) => {
+                let path_copy = wert.path().clone();
+                let repo_exe_pfad_copy = repo_exe_pfad.clone();
+                    pool.execute(move || {
+                        match check_and_create_sc2_file(path_copy, &repo_exe_pfad_copy) {
+                            Ok(_) => {}
+                            Err(_) => {}
+                        }
+                    });
+            }
+            Err(_) => {}
         }
     }
+    pool.join();
 }
 
-fn check_and_create_sc2_file(
-    path: Result<fs::DirEntry, io::Error>,
-    repo_exe_pfad: &String,
-) -> Result<(), io::Error> {
-    let temp_path_scx = path?.path();
+fn check_and_create_sc2_file(path: PathBuf, repo_exe_pfad: &String) -> Result<(), io::Error> {
+    let temp_path_scx = path;
 
     // Endung von der Datei holen und prüfen
     match temp_path_scx.extension() {
