@@ -20,20 +20,19 @@ fn main() {
 
     let paths = fs::read_dir(repo_forms_pfad).expect("Pfad konnte nicht gelesen werden.");
 
-    let pool = ThreadPool::new(12);
+    let pool = ThreadPool::new(4);
 
     for path in paths {
-        
         match path {
             Ok(wert) => {
                 let path_copy = wert.path().clone();
                 let repo_exe_pfad_copy = repo_exe_pfad.clone();
-                    pool.execute(move || {
-                        match check_and_create_sc2_file(path_copy, &repo_exe_pfad_copy) {
-                            Ok(_) => {}
-                            Err(_) => {}
-                        }
-                    });
+                pool.execute(move || {
+                    match check_and_create_sc2_file(path_copy, &repo_exe_pfad_copy) {
+                        Ok(_) => {}
+                        Err(_) => {}
+                    }
+                });
             }
             Err(_) => {}
         }
