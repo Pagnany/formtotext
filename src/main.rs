@@ -89,12 +89,12 @@ fn check_and_create_sc2_file(path: PathBuf, repo_exe_pfad: &String) -> Result<()
 
 fn get_last_edit_time(pfad: &PathBuf) -> u64 {
     let mut temp: u64 = 0;
-    fs::metadata(pfad).map_or((), |x| {
-        x.modified().map_or((), |y| {
-            y.duration_since(UNIX_EPOCH).map_or((), |z| {
+    if let Ok(x) = fs::metadata(pfad) {
+        if let Ok(y) = x.modified() {
+            if let Ok(z) = y.duration_since(UNIX_EPOCH) {
                 temp = z.as_secs();
-            });
-        })
-    });
+            }
+        }
+    }
     temp
 }
